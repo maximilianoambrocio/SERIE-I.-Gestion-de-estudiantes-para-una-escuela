@@ -1,0 +1,86 @@
+#include <iostream>
+#include <mysql/mysql.h>
+MYSQL* conn;
+
+conn = mysql_init(NULL);
+
+if (conn == NULL) {
+    std::cout << "Error al inicializar la conexión: " << mysql_error(conn) << std::endl;
+    return 1;
+}
+
+if (mysql_real_connect(conn, "localhost", "usuario", "contraseña", "basedatos", 0, NULL, 0) == NULL) {
+    std::cout << "Error al conectar a la base de datos: " << mysql_error(conn) << std::endl;
+    return 1;
+}
+MYSQL* conn;
+
+conn = mysql_init(NULL);
+
+if (conn == NULL) {
+    std::cout << "Error al inicializar la conexión: " << mysql_error(conn) << std::endl;
+    return 1;
+}
+
+if (mysql_real_connect(conn, "localhost", "usuario", "contraseña", "basedatos", 0, NULL, 0) == NULL) {
+    std::cout << "Error al conectar a la base de datos: " << mysql_error(conn) << std::endl;
+    return 1;
+}
+void crearEstudiante(const std::string & nombre, int edad, const std::string & curso) {
+    std::string query = "INSERT INTO estudiantes (nombre, edad, curso) VALUES ('" + nombre + "', " + std::to_string(edad) + ", '" + curso + "')";
+
+    if (mysql_query(conn, query.c_str()) != 0) {
+        std::cout << "Error al crear el estudiante: " << mysql_error(conn) << std::endl;
+    }
+    else {
+        std::cout << "Estudiante creado exitosamente." << std::endl;
+    }
+}
+void leerEstudiantes() {
+    std::string query = "SELECT * FROM estudiantes";
+
+    if (mysql_query(conn, query.c_str()) != 0) {
+        std::cout << "Error al leer estudiantes: " << mysql_error(conn) << std::endl;
+        return;
+    }
+
+    MYSQL_RES* result = mysql_store_result(conn);
+    if (result == NULL) {
+        std::cout << "Error al obtener el resultado de la consulta: " << mysql_error(conn) << std::endl;
+        return;
+    }
+
+    int num_fields = mysql_num_fields(result);
+    MYSQL_ROW row;
+
+    while ((row = mysql_fetch_row(result))) {
+        for (int i = 0; i < num_fields; i++) {
+            std::cout << row[i] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    mysql_free_result(result);
+}
+void actualizarEstudiante(int id, const std::string& nombre, int edad, const std::string& curso) {
+    std::string query = "UPDATE estudiantes SET nombre = '" + nombre + "', edad = " + std::to_string(edad) + ", curso = '" + curso + "' WHERE id = " + std::to_string(id);
+
+    if (mysql_query(conn, query.c_str()) != 0) {
+        std::cout << "Error al actualizar el estudiante: " << mysql_error(conn) << std::endl;
+    }
+    else {
+        std::cout << "Estudiante actualizado exitosamente." << std::endl;
+    }
+}
+void eliminarEstudiante(int id) {
+    std::string query = "DELETE FROM estudiantes WHERE id = " + std::to_string(id);
+
+    if (mysql_query(conn, query.c_str()) != 0) {
+        std::cout << "Error al eliminar el estudiante: " << mysql_error(conn) << std::endl;
+    }
+    else {
+        std::cout << "Estudiante eliminado exitosamente." << std::endl;
+    }
+}
+mysql_close(conn);
+
